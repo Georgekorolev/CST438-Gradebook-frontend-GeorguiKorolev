@@ -13,12 +13,12 @@ import {SERVER_URL} from '../constants.js'
 //
 
 class Assignment extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {selected: 0, assignments: []};
-    };
+  constructor(props) {
+    super(props);
+    this.state = {selected: 0, assignments: []};
+  };
  
-   componentDidMount() {
+  componentDidMount() {
     this.fetchAssignments();
   }
  
@@ -44,7 +44,7 @@ class Assignment extends React.Component {
     .catch(err => console.error(err)); 
   }
   
-   onRadioClick = (event) => {
+  onRadioClick = (event) => {
     console.log("Assignment.onRadioClick " + event.target.value);
     this.setState({selected: event.target.value});
   }
