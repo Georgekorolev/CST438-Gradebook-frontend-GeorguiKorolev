@@ -4,6 +4,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Gradebook from './components/Gradebook';
 import Assignment from './components/Assignment';
+import NewAssignment from './components/NewAssignment';
 import {BrowserRouter, Switch,  Route} from 'react-router-dom';
 
 function App() {
