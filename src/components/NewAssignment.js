@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import Cookies from 'js-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,8 +18,39 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 class NewAssignment extends Component {
     constructor(props) {
       super(props);
-      this.state = {name:"", dueDate:"", courseId: 0 , selectedDate: null};
+      this.state = {name:"", dueDate:"", selectedDate: null, courses: [], selectedCourse: -1};
+      this.handleCourseChange = this.handleCourseChange.bind(this);
     };
+
+    componentDidMount() {
+      this.fetchCourses();
+    }
+
+    fetchCourses = () => {
+      console.log("NewAssignment.fetchCourses");
+      const token = Cookies.get('XSRF-TOKEN');
+      fetch(`${SERVER_URL}/courses`, 
+        {  
+          method: 'GET', 
+          headers: { 'X-XSRF-TOKEN': token }
+        } )
+      .then((response) => response.json()) 
+      .then((responseData) => { 
+        if (Array.isArray(responseData.courses)) {
+          //  add to each course an "id"  This is required by DataGrid  "id" is the row index in the data grid table 
+          this.setState({ courses: responseData.courses.map((course, index) => ( { id: index, ...course } )) });
+          responseData.courses.forEach(course => {
+            console.log(course);
+          });
+          
+        } else {
+          toast.error("Fetch failed.", {
+            position: toast.POSITION.BOTTOM_LEFT
+          });
+        }        
+      })
+      .catch(err => console.error(err)); 
+    }
 
     handleChange = (event) => {
     this.setState({[event.target.name]:event.target.value});
@@ -32,12 +65,33 @@ class NewAssignment extends Component {
     }
 
 
-  // Add the assignment and close the dialog
+    // Add the assignment
     handleSubmit = () => {
+        
+      if(this.state.selectedCourse === -1){
+        toast.error("A course MUST be selected.", {
+          position: toast.POSITION.TOP_CENTER
+        });
+        return;
+      }
+
+      if(this.state.name === ""){
+        toast.error("Assignment name cannot be empty.", {
+          position: toast.POSITION.TOP_CENTER
+        });
+        return;
+      }
+
+      if(this.state.selectedDate === null){
+        toast.error("A due date MUST be selected.", {
+          position: toast.POSITION.TOP_CENTER
+        });
+        return;
+      }
       
        const assignment = {name: this.state.name, 
                           dueDate: this.convertDateToString(this.state.selectedDate), 
-                          courseId: this.state.courseId}
+                          courseId: this.state.selectedCourse}
                           
         fetch(`${SERVER_URL}/addAssignment`, 
           {  
@@ -72,12 +126,27 @@ class NewAssignment extends Component {
       this.setState({ selectedDate: date });
     }
 
+    handleCourseChange(event) {
+      console.log(event.target)
+      this.setState({ selectedCourse: event.target.value });
+    }
+
     render()  { 
         return(
             <div className="App">
               <div style={{padding: 10}}>
-                <TextField autoFocus label="Course Id" name="courseId" 
-                         onChange={this.handleChange}  />
+                <Select
+                  labelId="select-label"
+                  id="select"
+                  value={this.state.selectedCourse}
+                  onChange={this.handleCourseChange}
+                >
+                  {this.state.courses.map((course) => (
+                    <MenuItem key={course.title} value={course.courseId}>
+                      {course.title}
+                    </MenuItem>
+                  ))}
+                </Select>
                 <br/><br/>
                 <TextField label="Assignment name" name="name"
                           onChange={this.handleChange}  />
