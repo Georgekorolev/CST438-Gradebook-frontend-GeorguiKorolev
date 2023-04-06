@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import {DataGrid} from '@mui/x-data-grid';
 import {SERVER_URL} from '../constants.js';
-import NewAssignment from './NewAssignment.js';
 
 // NOTE:  for OAuth security, http request must have
 //   credentials: 'include' 
@@ -68,15 +67,15 @@ class Assignment extends React.Component {
         });
         
         this.fetchAssignments();
-        this.setState(this.state.selected = null)
+        this.setState({selected: null})
       } else {
-        toast.error("Error assignment deletion failed.", {
+        toast.error("Assignment cannot have any grades assigned.", {
             position: toast.POSITION.TOP_CENTER
         });
         console.error('Post http status =' + res.status);
       }})
     .catch(err => {
-      toast.error("Error assignment deletion failed.", {
+      toast.error("Assignment deletion failed.", {
           position: toast.POSITION.TOP_CENTER
       });
       console.error(err.message);
@@ -92,7 +91,7 @@ class Assignment extends React.Component {
         renderCell: (params) => (
           <div>
           <Radio
-            checked={params.row.id == this.state.selected}
+            checked={params.row.id === this.state.selected}
             onChange={this.onRadioClick}
             value={params.row.id}
             color="default"
