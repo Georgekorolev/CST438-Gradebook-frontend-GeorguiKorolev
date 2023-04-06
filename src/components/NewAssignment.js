@@ -8,11 +8,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {SERVER_URL} from '../constants.js';
 import { Link } from 'react-router-dom';
+import InputLabel from '@mui/material/InputLabel';
 
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { FormControl } from '@mui/material';
 
 
 class NewAssignment extends Component {
@@ -135,11 +137,16 @@ class NewAssignment extends Component {
         return(
             <div className="App">
               <div style={{padding: 10}}>
+                <FormControl>
+                <InputLabel shrink={false} id="select-label">
+                  Select a course
+                </InputLabel>
                 <Select
                   labelId="select-label"
                   id="select"
                   value={this.state.selectedCourse}
                   onChange={this.handleCourseChange}
+                  displayEmpty
                 >
                   {this.state.courses.map((course) => (
                     <MenuItem key={course.title} value={course.courseId}>
@@ -153,9 +160,9 @@ class NewAssignment extends Component {
                 <br/><br/>
                 <LocalizationProvider dateAdapter={AdapterDayjs} style={{margin: 10}}>
                   <DatePicker value={this.state.selectedDate} onChange={(date) => this.handleDateChange(date)} 
-                  format="YYYY-MM-DD" views={["year", "month", "day"]}/>
+                  label="Select a due date"/>
                 </LocalizationProvider>
-                
+                </FormControl>
               </div>
               <div style={{ height: 400, width: '100%' }}>
                 <Button id="Submit" variant="outlined" color="primary" style={{margin: 10}} onClick={this.handleSubmit} >
