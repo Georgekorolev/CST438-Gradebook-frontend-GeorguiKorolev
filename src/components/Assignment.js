@@ -1,24 +1,24 @@
 import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
 import {DataGrid} from '@mui/x-data-grid';
-import {SERVER_URL} from '../constants.js'
+import {SERVER_URL} from '../constants.js';
 
 // NOTE:  for OAuth security, http request must have
 //   credentials: 'include' 
 //
 
 class Assignment extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {selected: 0, assignments: []};
-    };
- 
-   componentDidMount() {
+  constructor(props) {
+    super(props);
+    this.state = {selected: null, assignments: []};
+  };
+
+  componentDidMount() {
     this.fetchAssignments();
   }
  
@@ -44,13 +44,46 @@ class Assignment extends React.Component {
     .catch(err => console.error(err)); 
   }
   
-   onRadioClick = (event) => {
+  onRadioClick = (event) => {
     console.log("Assignment.onRadioClick " + event.target.value);
     this.setState({selected: event.target.value});
   }
+
+  handleDelete = () => {
+    fetch(`${SERVER_URL}/deleteAssignment`, 
+    {  
+      method: 'DELETE', 
+      headers: 
+      { 
+        'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN'),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(this.state.assignments[this.state.selected])
+    } )
+    .then(res => {
+      if (res.ok) {
+        toast.success("Assignment successfully deleted", {
+            position: toast.POSITION.TOP_CENTER
+        });
+        
+        this.fetchAssignments();
+        this.setState({selected: null})
+      } else {
+        toast.error("Assignment cannot have any grades assigned.", {
+            position: toast.POSITION.TOP_CENTER
+        });
+        console.error('Post http status =' + res.status);
+      }})
+    .catch(err => {
+      toast.error("Assignment deletion failed.", {
+          position: toast.POSITION.TOP_CENTER
+      });
+      console.error(err.message);
+    })
+  }
   
   render() {
-     const columns = [
+    const columns = [
       {
         field: 'assignmentName',
         headerName: 'Assignment',
@@ -58,7 +91,7 @@ class Assignment extends React.Component {
         renderCell: (params) => (
           <div>
           <Radio
-            checked={params.row.id == this.state.selected}
+            checked={params.row.id === this.state.selected}
             onChange={this.onRadioClick}
             value={params.row.id}
             color="default"
@@ -78,11 +111,19 @@ class Assignment extends React.Component {
             <h4>Assignment(s) ready to grade: </h4>
               <div style={{ height: 450, width: '100%', align:"left"   }}>
                 <DataGrid rows={this.state.assignments} columns={columns} />
-              </div>                
+              </div>    
+            <Button component={Link} to={{pathname:'/newAssignment'}} 
+                    variant="outlined" color="primary" style={{margin: 10}}>
+              add new assignment
+            </Button>            
             <Button component={Link} to={{pathname:'/gradebook',   assignment: assignmentSelected }} 
-                    variant="outlined" color="primary" disabled={this.state.assignments.length===0}  style={{margin: 10}}>
+                    variant="outlined" color="primary" disabled={this.state.selected===null}  style={{margin: 10}}>
               Grade
             </Button>
+            <Button variant="outlined" color="error" style={{margin: 10}} disabled={this.state.selected===null} onClick={this.handleDelete}>
+              delete selected
+            </Button>
+
             <ToastContainer autoClose={1500} /> 
           </div>
       )

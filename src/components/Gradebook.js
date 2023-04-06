@@ -1,6 +1,7 @@
 import React  from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import {DataGrid} from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
@@ -144,6 +145,9 @@ class Gradebook extends React.Component {
                 <DataGrid rows={this.state.grades} columns={columns} onCellEditCommit={this.handleCellEditCommit}  />
                 <Button id="Submit" variant="outlined" color="primary" style={{margin: 10}} onClick={this.handleSubmit} >
                    Submit
+                </Button>
+                <Button component={Link} to={{pathname:'/'}} id="Back" variant="outlined" color="primary" style={{margin: 10}} >
+                   Back
                 </Button>
               </div>
               <ToastContainer autoClose={1500} />   
